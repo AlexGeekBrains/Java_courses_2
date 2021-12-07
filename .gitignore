@@ -1,0 +1,34 @@
+.gradle
+/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.ipr
+/out/
+target/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+application-database.yml
+application-wild.yml
+application-dev.yml
+application-test.yml
+!/src/integrationTest/resources/application-test.yml
+application-prod.yml
+/logs/
