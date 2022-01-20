@@ -1,6 +1,7 @@
 package server;
 
 import org.omg.CORBA.PUBLIC_MEMBER;
+import service.ServiceMessages;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -47,10 +48,12 @@ public class Server {
 
     public void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
+        broadcastClientList();
     }
 
     public void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
+        broadcastClientList();
     }
 
     public void broadcastMsg(ClientHandler sender, String msg) {
@@ -60,19 +63,41 @@ public class Server {
         }
     }
 
-    /* Реализовать личные сообщения, если клиент пишет «/w nick3 Привет, как дела», то только клиенту с ником nick3
-    и отправителю должно прийти сообщение «Привет, как дела» */
-
-    public void privateMsg(ClientHandler sender, String to, String msg) {
-
-        for (ClientHandler client : clients) {
-            if (client.getNickname().equals(to)) {
-                client.sendMsg("[privat message from: " + sender.getNickname() + "] " + msg);
-                sender.sendMsg("[privat message to: " + to + "] " + msg);
+    public void privateMsg(ClientHandler sender, String receiver, String msg) {
+        String message = String.format("[ %s ] to [ %s ]: %s", sender.getNickname(), receiver, msg);
+        for (ClientHandler c : clients) {
+            if (c.getNickname().equals(receiver)) {
+                c.sendMsg(message);
+                if (!sender.getNickname().equals(receiver)) {
+                    sender.sendMsg(message);
+                }
                 return;
             }
         }
-        sender.sendMsg("User with nickname " + to + " not found");
+        sender.sendMsg("not found user: " + receiver);
+    }
+
+    public boolean isLoginAuthenticated(String login) {
+        for (ClientHandler c : clients) {
+            if (c.getLogin().equals(login)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void broadcastClientList() {
+        StringBuilder sb = new StringBuilder(ServiceMessages.CLIENT_LIST);
+
+        for (ClientHandler c : clients) {
+            sb.append(" ").append(c.getNickname());
+        }
+
+        String message = sb.toString();
+
+        for (ClientHandler c : clients) {
+            c.sendMsg(message);
+        }
     }
 
     public AuthService getAuthService() {
